@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://ducih2q5t7ciw"]
+
+[ext_resource type="Script" uid="uid://c8ord8v4hsxmk" path="res://cell.gd" id="1_yh0nt"]
+[ext_resource type="Material" uid="uid://ctd8qspjn71r1" path="res://Materials/alpa0.tres" id="2_gwrgs"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_gwrgs"]
+material = ExtResource("2_gwrgs")
+size = Vector3(0.9, 0.9, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4b1vk"]
+size = Vector3(0.8076172, 0.82714844, 0.8886719)
+
+[node name="Area3D" type="Area3D" groups=["game_cell"]]
+script = ExtResource("1_yh0nt")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_gwrgs")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_4b1vk")
