@@ -7,7 +7,7 @@ sections = 2
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_1pt15"]
 height = 0.4272461
 
-[node name="Area3D" type="Area3D"]
+[node name="Area3D" type="Area3D" groups=["game_piece"]]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("TubeTrailMesh_1pt15")
