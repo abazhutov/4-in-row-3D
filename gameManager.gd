@@ -49,26 +49,24 @@ func init_board_state():
 func generate_board_cells():
 	# Генерация ячеек и их центрирование
 	for x in range(board_size):
-		print("for_x=",x)
 		for z in range(board_size):
-			#for y in range(board_size):
-				var cell = cell_scene.instantiate()
-				var var_y = 0
+			create_cell(x,0,z)
 				
-				# Расчет позиции для центрирования
-				
-				cell.position.x = x * cell_size - board_offset + cell_size / 2 
-				cell.position.z = z * cell_size - board_offset + cell_size / 2
-				#cell.position.y = y * cell_size - offset + cell_size / 2
-				cell.position.y = var_y * cell_size - board_offset + cell_size / 2
-				# 1. Передача логических координат ячейке
-				cell.set_coordinates(Vector3i(x, var_y, z))
-				
-				# 2. Подключение сигнала: при клике вызывается метод _on_cell_clicked
-				cell.cell_clicked.connect(_on_cell_clicked)
-				
-				add_child(cell)
+func create_cell(x,y,z: int):			
+	var cell = cell_scene.instantiate()
+	
+	# Расчет позиции для центрирования
+	cell.position.x = x * cell_size - board_offset + cell_size / 2 
+	cell.position.z = z * cell_size - board_offset + cell_size / 2
+	cell.position.y = y * cell_size - board_offset + cell_size / 2
+	# 1. Передача логических координат ячейке
+	cell.set_coordinates(Vector3i(x, y, z))
+	# 2. Подключение сигнала: при клике вызывается метод _on_cell_clicked
+	cell.cell_clicked.connect(_on_cell_clicked)
+	
+	add_child(cell)
 
+#--------------------------------------------------
 # --- КОНТРОЛЛЕР: Обработчик клика ---
 func _on_cell_clicked(coords: Vector3i):
 	var x = coords.x
@@ -78,8 +76,6 @@ func _on_cell_clicked(coords: Vector3i):
 	print("x=",x,"y=",y,"z",z)
 	
 	if board_state[x][y][z] == EMPTY:
-		var cell = cell_scene.instantiate()
-		
 		print("Ход игрока ", current_player, " на: ", coords)
 		
 		# 1. Обновление модели
@@ -96,26 +92,13 @@ func _on_cell_clicked(coords: Vector3i):
 			
 		#3.1 создание ячейки над выбранной
 		if((y + 1) < board_size):
-			var var_y = y + 1
-			
-			cell.position.x = x * cell_size - board_offset + cell_size / 2 # Добавляем 0.5 для центрирования 1x1 меша
-			cell.position.z = z * cell_size - board_offset + cell_size / 2
-			#cell.position.y = y * cell_size - offset + cell_size / 2
-			
-			# 1. Передача логических координат ячейке
-			cell.position.y = var_y * cell_size - board_offset + cell_size / 2
-			cell.set_coordinates(Vector3i(x, var_y, z))
-			
-			# 2. Подключение сигнала: при клике вызывается метод _on_cell_clicked
-			cell.cell_clicked.connect(_on_cell_clicked)
-		
-			# 3. создание ячейки
-			add_child(cell)
+			create_cell(x, (y + 1), z)
 		
 		# 4. Переключение игрока
 		current_player = PLAYER_2 if current_player == PLAYER_1 else PLAYER_1
 	else:
 		print("Эта позиция уже занята.")
+#--------------------------------------------------
 
 # Функция для визуального размещения фишки
 func place_piece_visual(coords: Vector3i):
@@ -154,26 +137,19 @@ func check_win(coords: Vector3i, player_id: int) -> bool:
 	
 	#массив с 13 уникальными (без обратных) векторами
 	var unique_directions = [
-		Vector3i(1, 0,  0),
-		Vector3i(0, 1,  0),
-		Vector3i(0, 0,  1),
-		Vector3i(1, 1,  0),
-		Vector3i(1, -1, 0),
-		Vector3i(1, 0,  1),
-		Vector3i(1, 0,  -1),
-		Vector3i(0, 1,  1),
-		Vector3i(0, 1,  -1),
-		Vector3i(1, 1,  1),
-		Vector3i(1, 1,  -1),
-		Vector3i(1, -1, 1),
+		Vector3i(1, 0,  0), Vector3i(0, 1,  0), Vector3i(0, 0,  1),
+		Vector3i(1, 1,  0), Vector3i(1, -1, 0), Vector3i(1, 0,  1),
+		Vector3i(1, 0,  -1), Vector3i(0, 1,  1), Vector3i(0, 1,  -1),
+		Vector3i(1, 1,  1), Vector3i(1, 1,  -1), Vector3i(1, -1, 1),
 		Vector3i(-1, 1, 1)]
-
+	
+	# подсчёт по направлению
 	for direction in unique_directions:
 		var count = 1
 		
-		# V ->
+		# в одлну сторону ->
 		count += count_line_match(x, y, z, direction, player_id)
-		# V <-
+		# в другую сторону <-
 		count += count_line_match(x, y, z, -direction, player_id)
 		
 		if count >= 4:
@@ -181,7 +157,6 @@ func check_win(coords: Vector3i, player_id: int) -> bool:
 			
 	return false
 
-# GameManager.gd
 func count_line_match(start_x: int, start_y: int, start_z: int, direction: Vector3i, player_id: int) -> int:
 	var count = 0
 	var dx = direction.x
