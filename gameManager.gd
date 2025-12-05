@@ -9,6 +9,7 @@ var TransparentMaterial = load("res://Materials/alpa0.tres")
 
 const cell_size = 1.0
 const board_size = 5 # 5x5x5
+var board_offset = float(board_size) / 2.0
 var current_player = 1 # 1: Игрок 1 (Black), 2: Игрок 2/AI (White)
 
 # --- МОДЕЛЬ ИГРЫ ---
@@ -48,18 +49,20 @@ func init_board_state():
 func generate_board_cells():
 	# Генерация ячеек и их центрирование
 	for x in range(board_size):
+		print("for_x=",x)
 		for z in range(board_size):
-			for y in range(board_size):
+			#for y in range(board_size):
 				var cell = cell_scene.instantiate()
+				var var_y = 0
 				
 				# Расчет позиции для центрирования
-				var offset = float(board_size) / 2.0
-				cell.position.x = x * cell_size - offset + cell_size / 2 # Добавляем 0.5 для центрирования 1x1 меша
-				cell.position.z = z * cell_size - offset + cell_size / 2
-				cell.position.y = y * cell_size - offset + cell_size / 2
 				
+				cell.position.x = x * cell_size - board_offset + cell_size / 2 
+				cell.position.z = z * cell_size - board_offset + cell_size / 2
+				#cell.position.y = y * cell_size - offset + cell_size / 2
+				cell.position.y = var_y * cell_size - board_offset + cell_size / 2
 				# 1. Передача логических координат ячейке
-				cell.set_coordinates(Vector3i(x, y, z))
+				cell.set_coordinates(Vector3i(x, var_y, z))
 				
 				# 2. Подключение сигнала: при клике вызывается метод _on_cell_clicked
 				cell.cell_clicked.connect(_on_cell_clicked)
@@ -72,7 +75,11 @@ func _on_cell_clicked(coords: Vector3i):
 	var y = coords.y
 	var z = coords.z
 	
+	print("x=",x,"y=",y,"z",z)
+	
 	if board_state[x][y][z] == EMPTY:
+		var cell = cell_scene.instantiate()
+		
 		print("Ход игрока ", current_player, " на: ", coords)
 		
 		# 1. Обновление модели
@@ -86,6 +93,24 @@ func _on_cell_clicked(coords: Vector3i):
 			print("Игрок ", current_player, " победил!")
 			reset_game()
 			return
+			
+		#3.1 создание ячейки над выбранной
+		if((y + 1) < board_size):
+			var var_y = y + 1
+			
+			cell.position.x = x * cell_size - board_offset + cell_size / 2 # Добавляем 0.5 для центрирования 1x1 меша
+			cell.position.z = z * cell_size - board_offset + cell_size / 2
+			#cell.position.y = y * cell_size - offset + cell_size / 2
+			
+			# 1. Передача логических координат ячейке
+			cell.position.y = var_y * cell_size - board_offset + cell_size / 2
+			cell.set_coordinates(Vector3i(x, var_y, z))
+			
+			# 2. Подключение сигнала: при клике вызывается метод _on_cell_clicked
+			cell.cell_clicked.connect(_on_cell_clicked)
+		
+			# 3. создание ячейки
+			add_child(cell)
 		
 		# 4. Переключение игрока
 		current_player = PLAYER_2 if current_player == PLAYER_1 else PLAYER_1
