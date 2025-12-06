@@ -1,8 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://c47d0qpugjwla"]
+[gd_scene load_steps=5 format=3 uid="uid://c47d0qpugjwla"]
 
 [ext_resource type="Script" uid="uid://c0u7vghwxt4qs" path="res://gameManager.gd" id="1_ig7tw"]
-[ext_resource type="Script" uid="uid://rhd7lm163i6d" path="res://camera_pivot.gd" id="2_h2yge"]
-[ext_resource type="Script" uid="uid://bt6qhal8udbg6" path="res://camera_3d.gd" id="3_1bvp3"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ig7tw"]
 
@@ -10,11 +8,103 @@
 material = SubResource("StandardMaterial3D_ig7tw")
 size = Vector2(5, 5)
 
+[sub_resource type="GDScript" id="GDScript_ig7tw"]
+script/source = "extends Node3D
+
+# --- Настройки Камеры ---
+const ROTATION_SPEED = 0.003 # Скорость вращения мышью
+const PAN_SPEED = 0.01       # Скорость панорамирования (перетаскивания)
+const ZOOM_SPEED = 0.5       # Скорость зума колесиком
+const MIN_DISTANCE = -5.0     # Минимальное расстояние камеры от центра
+const MAX_DISTANCE = 10.0    # Максимальное расстояние камеры от центра
+
+var is_rotating = false
+var is_panning = false
+var pan_origin: Vector2
+var camera_arm: Node3D # Ссылка на CameraArm
+var camera_node: Camera3D # Ссылка на Camera3D
+
+func _ready():
+	# Получаем ссылки на дочерние узлы
+	camera_arm = $CameraArm
+	camera_node = $CameraArm/Camera3D
+	
+	# Делаем курсор видимым по умолчанию
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+# ГЛАВНАЯ ФУНКЦИЯ ОБРАБОТКИ ВВОДА
+func _input(event):
+	handle_mouse_buttons(event)
+	handle_scroll_wheel(event)
+
+# GameManager.gd (или CameraPivot.gd)
+
+func handle_mouse_buttons(event):
+	# --- ВРАЩЕНИЕ (Средняя Кнопка) ---
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			is_rotating = event.pressed
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if is_rotating else Input.MOUSE_MODE_VISIBLE)
+		
+		# --- ПАНОРАМИРОВАНИЕ (Правая Кнопка) ---
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			is_panning = event.pressed
+			if is_panning:
+				pan_origin = event.position # Запоминаем начальную позицию
+
+	# --- ДВИЖЕНИЕ МЫШИ ---
+	if event is InputEventMouseMotion:
+		var motion = event.relative
+		
+		if is_rotating:
+			# Вращение вокруг Y (узла CameraPivot)
+			self.rotation.y -= motion.x * ROTATION_SPEED
+			
+			# Наклон вокруг X (узла CameraArm)
+			var new_x_rot = camera_arm.rotation.x - motion.y * ROTATION_SPEED
+			# Ограничиваем наклон, чтобы не перевернуть камеру
+			camera_arm.rotation.x = clamp(new_x_rot, deg_to_rad(-80), deg_to_rad(-10))
+			
+		elif is_panning and is_panning:
+			# Получаем вектор движения в мировых координатах
+			var pan_vector = Vector3.ZERO
+			
+			# Движение вправо/влево (X)
+			pan_vector += camera_node.global_transform.basis.x * -motion.x * PAN_SPEED
+			
+			# Движение вверх/вниз (Y)
+			pan_vector += camera_node.global_transform.basis.y * motion.y * PAN_SPEED
+			
+			self.global_position += pan_vector
+			
+# --- 3. Реализация ЗУМИРОВАНИЯ ---
+
+func handle_scroll_wheel(event):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			zoom_camera(-ZOOM_SPEED) # Приближаем (Z уменьшается)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_camera(ZOOM_SPEED)  # Отдаляем (Z увеличивается)
+
+func zoom_camera(amount):
+	# Изменяем Z-позицию Camera3D относительно CameraArm
+	var new_z = camera_node.position.z + amount
+	
+	# Ограничиваем расстояние, чтобы камера не прошла через центр
+	new_z = clamp(new_z, MIN_DISTANCE, MAX_DISTANCE)
+	
+	camera_node.position.z = new_z
+
+
+func _process(delta):
+	# Если мы вращаем или перетаскиваем, это обрабатывается в _input (для движения мыши)
+	pass
+"
+
 [node name="GameManager" type="Node3D"]
 script = ExtResource("1_ig7tw")
 
 [node name="Plane" type="MeshInstance3D" parent="."]
-visible = false
 mesh = SubResource("PlaneMesh_0xm2m")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -22,10 +112,9 @@ transform = Transform3D(1, 0, 0, 0, 0.94205755, 0.3354516, 0, -0.3354516, 0.9420
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.97696376, 0.21340555, 0, -0.21340555, 0.97696376, 0, 2.0369296, 2.1762772)
-script = ExtResource("2_h2yge")
+script = SubResource("GDScript_ig7tw")
 
 [node name="CameraArm" type="Node3D" parent="CameraPivot"]
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/CameraArm"]
 transform = Transform3D(1, 0, 0, 0, 0.78371495, 0.6211206, 0, -0.6211206, 0.78371495, 0, -0.8295135, 0.97100735)
-script = ExtResource("3_1bvp3")
