@@ -4,7 +4,9 @@ var cell_scene = preload("res://cell.tscn")
 var piece_scene = preload("res://piece.tscn") # Сцена вашей фишки
 
 var DarkMaterial = load("res://Materials/darkMaterial.tres")
+var DarkAlphaMaterial = load("res://Materials/darkAlphaMaterial.tres")
 var LightMaterial = load("res://Materials/lightMaterial.tres")
+var LightAlphaMaterial = load("res://Materials/lightAlphaMaterial.tres")
 var TransparentMaterial = load("res://Materials/alpa0.tres")
 
 const cell_size = 1.0
@@ -18,12 +20,20 @@ const PLAYER_1 = 1
 const PLAYER_2 = 2
 var board_state: Array = [] # 3D-массив для хранения состояния: board_state[x][y][z]
 
+var ghost_piece: Node3D = null # Ссылка на текущую полупрозрачную фишку
+
 func _ready():
-	# clear_board()
+	# основу доски в начало кодинат по высоте
+	$Plane.position.y = - board_offset
+	
 	init_board_state()
 	generate_board_cells()
 
 func reset_game ():
+	if ghost_piece:
+		ghost_piece.queue_free()
+		ghost_piece = null
+		
 	clear_board()
 	board_state.clear()
 	init_board_state()
@@ -35,7 +45,7 @@ func reset_game ():
 func clear_board():
 	for child in get_children():
 		if child.is_in_group("game_cell") or child.is_in_group("game_piece"):
-			child.queue_free()
+			child.queue_free()	
 
 func init_board_state():
 	# Инициализация 3D-массива [5][5][5]
@@ -61,19 +71,61 @@ func create_cell(x,y,z: int):
 	cell.position.y = y * cell_size - board_offset + cell_size / 2
 	# 1. Передача логических координат ячейке
 	cell.set_coordinates(Vector3i(x, y, z))
-	# 2. Подключение сигнала: при клике вызывается метод _on_cell_clicked
+	# 2. Подключение сигналов: при клике вызывается метод _on_cell_clicked
 	cell.cell_clicked.connect(_on_cell_clicked)
+	cell.cell_hovered.connect(_on_cell_hovered)
+	cell.cell_unhovered.connect(_on_cell_unhovered) # Для очистки, когда мышь уходит
 	
 	add_child(cell)
 
 #--------------------------------------------------
+# --- КОНТРОЛЛЕР: Обработчик наведения ---
+func _on_cell_hovered(coords: Vector3i):	
+	handle_hover_visuals(coords)	
+	
+# --- КОНТРОЛЛЕР: Обработчик выхода мыши ---
+# Нужен, чтобы удалить призрака, когда мышь покидает последнюю активную ячейку
+func _on_cell_unhovered():
+	if ghost_piece:
+		ghost_piece.queue_free()
+		ghost_piece = null
+
+# Функция для управления отображением полупрозрачной фишки
+func handle_hover_visuals(coords: Vector3i):
+	var x = coords.x
+	var y = coords.y
+	var z = coords.z
+	
+	# 1. Если ghost_piece существует, удаляем его
+	if ghost_piece:
+		ghost_piece.queue_free()
+		ghost_piece = null
+		
+	# 2. Если ячейка занята, ничего не делаем
+	if board_state[x][y][z] != EMPTY:
+		return
+		
+	# 3. Создаем новую полупрозрачную фишку
+	var piece = piece_scene.instantiate()
+	var cell_pos = get_cell_position_from_coords(coords)
+	piece.position = cell_pos
+	
+	# Установка полупрозрачного материала для текущего игрока
+	if current_player == PLAYER_1:
+		piece.get_node("MeshInstance3D").material_override = DarkAlphaMaterial
+	else:
+		piece.get_node("MeshInstance3D").material_override = LightAlphaMaterial
+		
+	add_child(piece)
+	
+	# 4. Сохраняем ссылку на созданный объект
+	ghost_piece = piece
+
 # --- КОНТРОЛЛЕР: Обработчик клика ---
 func _on_cell_clicked(coords: Vector3i):
 	var x = coords.x
 	var y = coords.y
 	var z = coords.z
-	
-	print("x=",x,"y=",y,"z",z)
 	
 	if board_state[x][y][z] == EMPTY:
 		print("Ход игрока ", current_player, " на: ", coords)
@@ -89,6 +141,10 @@ func _on_cell_clicked(coords: Vector3i):
 			print("Игрок ", current_player, " победил!")
 			reset_game()
 			return
+		
+		if ghost_piece:
+			ghost_piece.queue_free()
+			ghost_piece = null
 			
 		#3.1 создание ячейки над выбранной
 		if((y + 1) < board_size):
