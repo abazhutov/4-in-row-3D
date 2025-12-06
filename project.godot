@@ -13,6 +13,7 @@ config_version=5
 config/name="3D board game (Copy)"
 run/main_scene="uid://c47d0qpugjwla"
 config/features=PackedStringArray("4.5", "Mobile")
+run/max_fps=60
 config/icon="res://icon.svg"
 
 [rendering]
