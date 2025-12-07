@@ -1,7 +1,11 @@
 [gd_scene load_steps=6 format=3 uid="uid://c47d0qpugjwla"]
 
 [ext_resource type="Script" uid="uid://c0u7vghwxt4qs" path="res://gameManager.gd" id="1_ig7tw"]
+<<<<<<< HEAD
+[ext_resource type="Texture2D" uid="uid://h0qg001qc6br" path="res://icon.png" id="2_0xm2m"]
+=======
 [ext_resource type="Texture2D" uid="uid://b77v41bs8dfh3" path="res://board_texture.png" id="2_0xm2m"]
+>>>>>>> dev
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ig7tw"]
 albedo_texture = ExtResource("2_0xm2m")

@@ -17,7 +17,11 @@ script = ExtResource("1_yh0nt")
 mesh = SubResource("BoxMesh_gwrgs")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+<<<<<<< HEAD
+shape = SubResource("BoxShape3D_4b1vk")
+=======
 shape = SubResource("BoxShape3D_gwrgs")
+>>>>>>> dev
 
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

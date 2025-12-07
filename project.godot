@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="3D board game (Copy)"
+config/name="4-in-row-3D (board game 5x5x5)"
 run/main_scene="uid://c47d0qpugjwla"
 config/features=PackedStringArray("4.5", "Mobile")
 run/max_fps=60
