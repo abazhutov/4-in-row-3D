@@ -9,7 +9,10 @@ var LightMaterial = load("res://Materials/lightMaterial.tres")
 var LightAlphaMaterial = load("res://Materials/lightAlphaMaterial.tres")
 var TransparentMaterial = load("res://Materials/alpa0.tres")
 
-const cell_size = 1.0
+const CELL_SIZE_X = 1.0
+const CELL_SIZE_Z = 1.0
+const CELL_SIZE_Y = 0.5
+
 const board_size = 5 # 5x5x5
 var board_offset = float(board_size) / 2.0
 var current_player = 1 # 1: Игрок 1 (Black), 2: Игрок 2/AI (White)
@@ -66,9 +69,9 @@ func create_cell(x,y,z: int):
 	var cell = cell_scene.instantiate()
 	
 	# Расчет позиции для центрирования
-	cell.position.x = x * cell_size - board_offset + cell_size / 2 
-	cell.position.z = z * cell_size - board_offset + cell_size / 2
-	cell.position.y = y * cell_size - board_offset + cell_size / 2
+	cell.position.x = x * CELL_SIZE_X - board_offset + CELL_SIZE_X / 2 
+	cell.position.z = z * CELL_SIZE_Z - board_offset + CELL_SIZE_Z / 2
+	cell.position.y = y * CELL_SIZE_Y - board_offset + CELL_SIZE_Y / 2
 	# 1. Передача логических координат ячейке
 	cell.set_coordinates(Vector3i(x, y, z))
 	# 2. Подключение сигналов: при клике вызывается метод _on_cell_clicked
@@ -180,9 +183,9 @@ func get_cell_position_from_coords(coords: Vector3i) -> Vector3:
 	var offset = float(board_size) / 2.0
 	
 	var pos = Vector3.ZERO
-	pos.x = x * cell_size - offset + cell_size / 2
-	pos.z = z * cell_size - offset + cell_size / 2
-	pos.y = y * cell_size - offset + cell_size / 2
+	pos.x = x * CELL_SIZE_X - offset + CELL_SIZE_X / 2
+	pos.z = z * CELL_SIZE_Z - offset + CELL_SIZE_Z / 2
+	pos.y = y * CELL_SIZE_Y - offset + CELL_SIZE_Y / 2
 	return pos
 
 # Определение победителя
