@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://c47d0qpugjwla"]
+[gd_scene load_steps=7 format=3 uid="uid://c47d0qpugjwla"]
 
 [ext_resource type="Script" uid="uid://c0u7vghwxt4qs" path="res://gameManager.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://b77v41bs8dfh3" path="res://board_texture.png" id="2_0xm2m"]
+[ext_resource type="LabelSettings" uid="uid://c8isglgaob77b" path="res://Materials/main_text.tres" id="3_h2yge"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ig7tw"]
 albedo_texture = ExtResource("2_0xm2m")
@@ -120,3 +121,48 @@ script = SubResource("GDScript_ig7tw")
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/CameraArm"]
 transform = Transform3D(1, 0, 0, 0, 0.78371495, 0.6211206, 0, -0.6211206, 0.78371495, 0, -0.8295135, 0.97100735)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="ControlPlayerTurn" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="LabelPlayerTurn" type="Label" parent="CanvasLayer/ControlPlayerTurn"]
+layout_mode = 0
+offset_right = 537.0
+offset_bottom = 88.0
+text = "Ход за такимито"
+label_settings = ExtResource("3_h2yge")
+
+[node name="ControlGameStatus" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LabelGameStatus" type="Label" parent="CanvasLayer/ControlGameStatus"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -44.0
+offset_right = 250.0
+offset_bottom = 44.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Выйграли те то"
+label_settings = ExtResource("3_h2yge")
+horizontal_alignment = 1
+vertical_alignment = 1

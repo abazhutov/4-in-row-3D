@@ -9,6 +9,9 @@ var LightMaterial = load("res://Materials/lightMaterial.tres")
 var LightAlphaMaterial = load("res://Materials/lightAlphaMaterial.tres")
 var TransparentMaterial = load("res://Materials/alpa0.tres")
 
+@onready var player_turn_label: Label = $"CanvasLayer/ControlPlayerTurn/LabelPlayerTurn"
+@onready var game_status_label: Label = $"CanvasLayer/ControlGameStatus/LabelGameStatus"
+
 const CELL_SIZE_X = 1.0
 const CELL_SIZE_Z = 1.0
 const CELL_SIZE_Y = 0.5
@@ -16,6 +19,7 @@ const CELL_SIZE_Y = 0.5
 const board_size = 5 # 5x5x5
 var board_offset = float(board_size) / 2.0
 var current_player = 1 # 1: Игрок 1 (Black), 2: Игрок 2/AI (White)
+var game_over = false
 
 # --- МОДЕЛЬ ИГРЫ ---
 const EMPTY = 0
@@ -26,13 +30,15 @@ var board_state: Array = [] # 3D-массив для хранения состо
 var ghost_piece: Node3D = null # Ссылка на текущую полупрозрачную фишку
 
 func _ready():
+	reset_game()
+
+func reset_game():
 	# основу доски в начало кодинат по высоте
 	$Plane.position.y = - board_offset
 	
-	init_board_state()
-	generate_board_cells()
-
-func reset_game ():
+	game_over = false # Сбрасываем флаг
+	game_status_label.visible = false # Скрываем сообщение
+	
 	if ghost_piece:
 		ghost_piece.queue_free()
 		ghost_piece = null
@@ -41,6 +47,8 @@ func reset_game ():
 	board_state.clear()
 	init_board_state()
 	generate_board_cells()
+
+	update_turn_display() # Показываем первый ход
 	current_player = PLAYER_1
 	print("Игра перезапущена. Ход игрока ", current_player)
 	# return
@@ -80,7 +88,15 @@ func create_cell(x,y,z: int):
 	cell.cell_unhovered.connect(_on_cell_unhovered) # Для очистки, когда мышь уходит
 	
 	add_child(cell)
-
+	
+func update_turn_display():
+	var player_color = ""
+	if current_player == PLAYER_1:
+		player_color = "Черных" # Или DarkMaterial
+	else:
+		player_color = "Белых" # Или LightMaterial
+		
+	player_turn_label.text = "Ход: " + player_color
 #--------------------------------------------------
 # --- КОНТРОЛЛЕР: Обработчик наведения ---
 func _on_cell_hovered(coords: Vector3i):	
@@ -130,6 +146,9 @@ func _on_cell_clicked(coords: Vector3i):
 	var y = coords.y
 	var z = coords.z
 	
+	if game_over: 
+		return
+	
 	if board_state[x][y][z] == EMPTY:
 		print("Ход игрока ", current_player, " на: ", coords)
 		
@@ -142,6 +161,10 @@ func _on_cell_clicked(coords: Vector3i):
 		# 3. Проверка победы
 		if check_win(coords, current_player):
 			print("Игрок ", current_player, " победил!")
+			game_over = true
+			show_game_status(current_player) # Вызываем функцию отображения
+			# таймер для автоматического перезапуска
+			await get_tree().create_timer(4.0).timeout
 			reset_game()
 			return
 		
@@ -155,6 +178,7 @@ func _on_cell_clicked(coords: Vector3i):
 		
 		# 4. Переключение игрока
 		current_player = PLAYER_2 if current_player == PLAYER_1 else PLAYER_1
+		update_turn_display()
 	else:
 		print("Эта позиция уже занята.")
 #--------------------------------------------------
@@ -242,3 +266,8 @@ func count_line_match(start_x: int, start_y: int, start_z: int, direction: Vecto
 			break 
 			
 	return count
+	
+func show_game_status(winning_player: int):
+	game_status_label.visible = true
+	var player_name = "Черных" if winning_player == PLAYER_1 else "Белых"
+	game_status_label.text = "🏆 ПОБЕДА! Игрок за " + player_name + " выиграл!"
