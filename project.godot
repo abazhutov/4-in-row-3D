@@ -14,7 +14,7 @@ config/name="4-in-row-3D (board game 5x5x5)"
 run/main_scene="uid://c47d0qpugjwla"
 config/features=PackedStringArray("4.5", "Mobile")
 run/max_fps=60
-config/icon="res://icon.svg"
+config/icon="uid://drfrewsqivfgb"
 
 [rendering]
 

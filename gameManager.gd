@@ -1,7 +1,7 @@
 extends Node3D
 
-var cell_scene = preload("res://cell.tscn")
-var piece_scene = preload("res://piece.tscn") # Сцена вашей фишки
+var cell_scene = preload("res://Scenes/cell.tscn")
+var piece_scene = preload("res://Scenes/piece.tscn") # Сцена вашей фишки
 
 var DarkMaterial = load("res://Materials/darkMaterial.tres")
 var DarkAlphaMaterial = load("res://Materials/darkAlphaMaterial.tres")

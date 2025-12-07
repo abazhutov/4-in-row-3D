@@ -1,11 +1,11 @@
 [gd_scene load_steps=7 format=3 uid="uid://c47d0qpugjwla"]
 
-[ext_resource type="Script" uid="uid://c0u7vghwxt4qs" path="res://gameManager.gd" id="1_ig7tw"]
-[ext_resource type="Texture2D" uid="uid://b77v41bs8dfh3" path="res://board_texture.png" id="2_0xm2m"]
-[ext_resource type="LabelSettings" uid="uid://c8isglgaob77b" path="res://Materials/main_text.tres" id="3_h2yge"]
+[ext_resource type="Script" uid="uid://c0u7vghwxt4qs" path="res://gameManager.gd" id="1_8gbba"]
+[ext_resource type="Texture2D" uid="uid://cf122flo7wcg0" path="res://Materials/board_texture.png" id="2_jjvhh"]
+[ext_resource type="LabelSettings" uid="uid://c8isglgaob77b" path="res://Materials/main_text.tres" id="3_kry3j"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ig7tw"]
-albedo_texture = ExtResource("2_0xm2m")
+albedo_texture = ExtResource("2_jjvhh")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_0xm2m"]
 material = SubResource("StandardMaterial3D_ig7tw")
@@ -105,7 +105,7 @@ func _process(delta):
 "
 
 [node name="GameManager" type="Node3D"]
-script = ExtResource("1_ig7tw")
+script = ExtResource("1_8gbba")
 
 [node name="Plane" type="MeshInstance3D" parent="."]
 mesh = SubResource("PlaneMesh_0xm2m")
@@ -133,7 +133,7 @@ layout_mode = 0
 offset_right = 537.0
 offset_bottom = 88.0
 text = "Ход за такимито"
-label_settings = ExtResource("3_h2yge")
+label_settings = ExtResource("3_kry3j")
 
 [node name="ControlGameStatus" type="Control" parent="CanvasLayer"]
 layout_mode = 3
@@ -163,6 +163,6 @@ offset_bottom = 44.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Выйграли те то"
-label_settings = ExtResource("3_h2yge")
+label_settings = ExtResource("3_kry3j")
 horizontal_alignment = 1
 vertical_alignment = 1
