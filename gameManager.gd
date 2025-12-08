@@ -17,14 +17,19 @@ const CELL_SIZE_Z = 1.0
 const CELL_SIZE_Y = 0.5
 
 const board_size = 5 # 5x5x5
-var board_offset = float(board_size) / 2.0
+const board_offset = float(board_size) / 2.0
+
 var current_player = 1 # 1: Игрок 1 (Black), 2: Игрок 2/AI (White)
 var game_over = false
 
 # --- МОДЕЛЬ ИГРЫ ---
 const EMPTY = 0
+const PLAYER_DROW = 0
 const PLAYER_1 = 1
 const PLAYER_2 = 2
+
+var cnt_move = 0;
+
 var board_state: Array = [] # 3D-массив для хранения состояния: board_state[x][y][z]
 
 var ghost_piece: Node3D = null # Ссылка на текущую полупрозрачную фишку
@@ -36,6 +41,7 @@ func reset_game():
 	# основу доски в начало кодинат по высоте
 	$Plane.position.y = - board_offset
 	
+	cnt_move = 0;
 	game_over = false # Сбрасываем флаг
 	game_status_label.visible = false # Скрываем сообщение
 	
@@ -155,15 +161,25 @@ func _on_cell_clicked(coords: Vector3i):
 		# 1. Обновление модели
 		board_state[x][y][z] = current_player
 		
+		cnt_move += 1
+		
 		# 2. Обновление представления (визуализация фишки)
 		place_piece_visual(coords)
-		
-		# 3. Проверка победы
+			
+		# 3. Проверка победы		
 		if check_win(coords, current_player):
 			print("Игрок ", current_player, " победил!")
 			game_over = true
 			show_game_status(current_player) # Вызываем функцию отображения
 			# таймер для автоматического перезапуска
+			await get_tree().create_timer(4.0).timeout
+			reset_game()
+			return
+			
+		if cnt_move == board_size*board_size*board_size:
+			print("Ничья")
+			current_player = PLAYER_DROW
+			show_game_status(current_player)
 			await get_tree().create_timer(4.0).timeout
 			reset_game()
 			return
@@ -271,3 +287,6 @@ func show_game_status(winning_player: int):
 	game_status_label.visible = true
 	var player_name = "Черных" if winning_player == PLAYER_1 else "Белых"
 	game_status_label.text = "🏆 ПОБЕДА! Игрок за " + player_name + " выиграл!"
+	
+	if winning_player == PLAYER_DROW:
+		game_status_label.text = "Ничья!"
